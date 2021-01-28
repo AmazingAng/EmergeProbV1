@@ -17,4 +17,4 @@ Useful functions: utils.R
 ## Dependent library in R:
 Multi-processing library: parallel, foreach, doParallel
 
-Other: circular, distr, radial, plotrix
+Other: circular, distr, radial, plotrix, phaseR
