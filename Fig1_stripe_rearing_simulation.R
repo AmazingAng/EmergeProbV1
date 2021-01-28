@@ -14,8 +14,8 @@ library(parallel)
 library(foreach)
 library(doParallel)
 
-numCores <- detectCores() # detect available cores automatically
-numCores  = numCores-1 # set number of cores manually, I used 25 cores on a server, you may use less cores 
+print(paste("# of cores detected", detectCores()))# detect available cores automatically
+numCores  = 25 # set number of cores manually, I used 25 cores on a server, you may use less cores 
 registerDoParallel(numCores)  # use multicore, set to the number of cores
 
 ############################################################
@@ -29,15 +29,15 @@ for(lens_name in c(0,45,90,135)){
   # plot(seq(0,pi,by = 0.005), test, main ="prior")
   
   # input parameters
-  repeat_n = 25 # times of repetition
-  pre_n = 100
-  nl = pre_n
-  t_tot = 2000000 # ms
+  repeat_n = 25 # number of repetition
+  pre_n = 100 # input neurons
+  nl = pre_n 
+  t_tot = 1500000 # ms
   trial_t = 100 # ms time for each input presentation
   trial_n = t_tot/trial_t
-  ff.bg = 10
-  ff.A = 40
-  ff.sigma = 10
+  ff.bg = 10 # back ground firing rate (gaussian function)
+  ff.A = 40 # peak firing rate (gaussian function)
+  ff.sigma = 10 # sigma (gaussian function)
   
   ############################################################
   ## 2. Output ##
@@ -55,7 +55,7 @@ for(lens_name in c(0,45,90,135)){
   E_glu =  0.0  # mV AMPA reversal potential
   E_gaba = -70.0   # mVGABA reversal potential
   
-  kee = ne*0.112		# degree of connection from E to E: total number * probability
+  kee = ne*0		# degree of connection from E to E: total number * probability
   kei = ne*0.5        	# kei
   kie = ni*0.5        	# kie
   kii = ni*0.75        	# kii
@@ -70,11 +70,11 @@ for(lens_name in c(0,45,90,135)){
   gli = 0.006           # gli   0.09    0.12
   
   # params for Initial condition
-  pref.theta = pi # 90 degree
-  kappa = 0.5 
-  sigma.min = 30
-  sigma.max = 45
-  L1_sum = nl
+  pref.theta = pi # 90 degree, peak of the von-mises distribution
+  kappa = 0.5 # spread of the von-mises distribution
+  sigma.min = 30 # min sigma of the initial FF connection
+  sigma.max = 45 # max sigma of the initial FF connection
+  L1_sum = nl # sum of synaptic weights, param for weight rescaling 
   
   # params for test orientation selectivity
   step = 8
@@ -142,6 +142,7 @@ for(lens_name in c(0,45,90,135)){
       de*c0
     }
     
+    # initial condition
     pref.e = runif(ne, max = pi)
     sigma.e = runif(ne, min=sigma.min, max = sigma.max)/180*nl
     WeightMat = GaussianWeightFunc(ne, nl, pref.e,sigma.e)
@@ -152,7 +153,6 @@ for(lens_name in c(0,45,90,135)){
     WeightMat= WeightMat * qnfactor
     
     WeightMat.init = WeightMat
-    pdf.name = "init"
     test_result.init = network_test(WeightMat.init)
     analyze_results.init = analyze_tuning(test_result.init)
     # start simulation
@@ -160,13 +160,10 @@ for(lens_name in c(0,45,90,135)){
     tm_plst = 34 # tau - (ms)
     tp_plst = 14 # tau + (ms)
     mp_ratio = 1.05 # ratio between LTD and LTP
-    
     Bm_plst =  exp((-1./tm_plst) *dt)
     Bp_plst =  exp((-1./tp_plst) *dt)
-    
     A_ltp = 5.e-3 #
     A_ltd = mp_ratio*tp_plst*A_ltp/tm_plst
-    
     ym_plst<- rep(0,ne)
     yp_plst<- rep(0,pre_n)
     
@@ -226,7 +223,6 @@ for(lens_name in c(0,45,90,135)){
     }
     # print(repeat_i)
     test_result = network_test(WeightMat)
-    pdf.name = "final"
     analyze_results = analyze_tuning(test_result)
     # save data for i-th repeat
     result = list(analyze_results.init = analyze_results.init, analyze_results = analyze_results, WeightMat.init = WeightMat.init, WeightMat = WeightMat, 
@@ -236,7 +232,7 @@ for(lens_name in c(0,45,90,135)){
   }
   print(lens_name)
   save(list  = c( "results_list"),
-       file = paste("data/lens_results_uniforminit_long_", lens_name,".RData", sep = ""))
+       file = paste("data/lens_results_uniforminit_", lens_name,".RData", sep = ""))
   
 }
 stopImplicitCluster()

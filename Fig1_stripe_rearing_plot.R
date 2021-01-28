@@ -33,9 +33,9 @@ lines(x_STDP_plus, y_STDP_plus)
 ## Figure 1A: Continuous Inputt Pattern
 # plot rate for 90 degree input
 pre_n=100
-ff.bg = 10
-ff.A = 40
-ff.sigma = 10
+ff.bg = 10 # back ground firing rate (gaussian function)
+ff.A = 40 # peak firing rate (gaussian function)
+ff.sigma = 10 # sigma (gaussian function)
 g.x=1:pre_n
 ff_rate <- function(ff.mu){
   f=ff.bg + ff.A * exp( -pmin((g.x-ff.mu)^2, (g.x-pre_n-ff.mu)^2, (g.x+pre_n-ff.mu)^2)/(2*ff.sigma^2) )
